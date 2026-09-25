@@ -13,7 +13,6 @@ export default function TrainingMonitor() {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
-    // Fetch initial job state
     const fetchJob = async () => {
       try {
         const response = await axios.get(`${apiUrl}/training/${jobId}`);
@@ -28,7 +27,6 @@ export default function TrainingMonitor() {
     fetchJob();
   }, [jobId, apiUrl]);
 
-  // Poll for progress updates every 2 seconds while job is running
   useEffect(() => {
     if (!job || job.status === 'completed' || job.status === 'failed') {
       return;
@@ -38,8 +36,7 @@ export default function TrainingMonitor() {
       try {
         const response = await axios.get(`${apiUrl}/training/${jobId}`);
         setJob(response.data);
-        
-        // Track progress history for visualization (capped to avoid unbounded growth)
+
         if (response.data.metrics) {
           setProgressHistory(prev => [...prev, response.data.metrics].slice(-200));
         }
@@ -53,10 +50,15 @@ export default function TrainingMonitor() {
 
   if (loading) {
     return (
-      <div className="training-page min-h-screen p-8 flex items-center justify-center" role="status" aria-live="polite">
-        <div className="text-center">
-          <div className="training-spinner animate-spin rounded-full h-16 w-16 mx-auto mb-4" aria-hidden="true"></div>
-          <p className="text-gray-600">Loading training job...</p>
+      <div className="training-page" role="status" aria-live="polite">
+        <div className="training-content training-narrow">
+          <div className="training-skeleton" aria-hidden="true">
+            <div className="skeleton-line skeleton-title" />
+            <div className="skeleton-line" />
+            <div className="skeleton-line" />
+            <div className="skeleton-line skeleton-short" />
+          </div>
+          <p className="training-loading-text">Loading training job.</p>
         </div>
       </div>
     );
@@ -64,17 +66,17 @@ export default function TrainingMonitor() {
 
   if (error) {
     return (
-      <div className="training-page min-h-screen p-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="training-panel bg-white rounded-lg shadow-lg p-8">
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg mb-4" role="alert">
-              <p className="text-red-800">{error}</p>
+      <div className="training-page">
+        <div className="training-content training-narrow">
+          <div className="training-panel">
+            <div className="training-error" role="alert">
+              <p>{error}</p>
             </div>
             <button
               onClick={() => navigate('/training')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="button primary"
             >
-              Back to Training
+              Back to training
             </button>
           </div>
         </div>
@@ -82,155 +84,131 @@ export default function TrainingMonitor() {
     );
   }
 
-  const progress = job.total_epochs > 0 
+  const progress = job.total_epochs > 0
     ? Math.round((job.current_epoch / job.total_epochs) * 100)
     : 0;
 
-  const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    running: 'bg-blue-100 text-blue-800 border-blue-300',
-    completed: 'bg-green-100 text-green-800 border-green-300',
-    failed: 'bg-red-100 text-red-800 border-red-300'
-  };
-
   return (
-    <div className="training-page min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="training-panel bg-white rounded-lg shadow-lg p-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+    <div className="training-page">
+      <div className="training-content training-wide">
+        <div className="training-panel">
+          <div className="training-header">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Training Job {jobId.slice(0, 8)}</h1>
-              <p className="text-gray-600 mt-1">Monitor model training progress</p>
+              <h1>Training job {jobId.slice(0, 8)}</h1>
+              <p className="training-lede">Monitor model training progress.</p>
             </div>
-            <div className={`px-4 py-2 rounded-lg border-2 font-semibold capitalize ${statusColors[job.status]}`} role="status">
+            <p className={`training-status status-${job.status}`} role="status">
               {job.status}
+            </p>
+          </div>
+
+          <dl className="training-facts">
+            <div>
+              <dt>Epochs</dt>
+              <dd>{job.current_epoch}/{job.total_epochs}</dd>
+            </div>
+            <div>
+              <dt>Progress</dt>
+              <dd>{progress}%</dd>
+            </div>
+            <div>
+              <dt>Samples retained</dt>
+              <dd>{progressHistory.length} updates</dd>
+            </div>
+          </dl>
+
+          <div className="training-progress-block">
+            <div className="training-progress-top">
+              <p>Training progress</p>
+              <p>{progress}%</p>
+            </div>
+            <div
+              className="training-progress"
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-label="Training progress"
+            >
+              <span style={{ width: `${progress}%` }} />
             </div>
           </div>
 
-          {/* Status Overview */}
-          <div className="grid grid-cols-2 gap-4 mb-8 pb-8 border-b">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Epochs</p>
-              <p className="text-2xl font-bold text-gray-800">{job.current_epoch}/{job.total_epochs}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Progress</p>
-              <p className="text-2xl font-bold text-blue-600">{progress}%</p>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-700">Training Progress</label>
-              <span className="text-sm text-gray-600">{progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden" role="progressbar" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100" aria-label="Training progress">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Metrics */}
           {job.metrics && Object.keys(job.metrics).length > 0 && (
-            <div className="mb-8 pb-8 border-b">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Current Metrics</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <section className="training-section" aria-labelledby="training-current-metrics">
+              <h2 id="training-current-metrics">Current metrics</h2>
+              <dl className="training-metrics">
                 {job.metrics.train_loss != null && (
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg">
-                    <p className="text-xs text-gray-600 uppercase">Train Loss</p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {job.metrics.train_loss.toFixed(4)}
-                    </p>
+                  <div className="training-metric">
+                    <dt>Train loss</dt>
+                    <dd>{job.metrics.train_loss.toFixed(4)}</dd>
                   </div>
                 )}
                 {job.metrics.val_accuracy != null && (
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-                    <p className="text-xs text-gray-600 uppercase">Val Accuracy</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {(job.metrics.val_accuracy * 100).toFixed(2)}%
-                    </p>
+                  <div className="training-metric">
+                    <dt>Validation accuracy</dt>
+                    <dd>{(job.metrics.val_accuracy * 100).toFixed(2)}%</dd>
                   </div>
                 )}
                 {job.metrics.auc != null && (
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
-                    <p className="text-xs text-gray-600 uppercase">AUC</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {job.metrics.auc.toFixed(4)}
-                    </p>
+                  <div className="training-metric">
+                    <dt>AUC</dt>
+                    <dd>{job.metrics.auc.toFixed(4)}</dd>
                   </div>
                 )}
                 {job.metrics.accuracy != null && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-xs text-gray-600 uppercase">Accuracy</p>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {(job.metrics.accuracy * 100).toFixed(2)}%
-                    </p>
+                  <div className="training-metric">
+                    <dt>Accuracy</dt>
+                    <dd>{(job.metrics.accuracy * 100).toFixed(2)}%</dd>
                   </div>
                 )}
                 {job.metrics.precision != null && (
-                  <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg">
-                    <p className="text-xs text-gray-600 uppercase">Precision</p>
-                    <p className="text-2xl font-bold text-red-600">
-                      {(job.metrics.precision * 100).toFixed(2)}%
-                    </p>
+                  <div className="training-metric">
+                    <dt>Precision</dt>
+                    <dd>{(job.metrics.precision * 100).toFixed(2)}%</dd>
                   </div>
                 )}
                 {job.metrics.recall != null && (
-                  <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-lg">
-                    <p className="text-xs text-gray-600 uppercase">Recall</p>
-                    <p className="text-2xl font-bold text-pink-600">
-                      {(job.metrics.recall * 100).toFixed(2)}%
-                    </p>
+                  <div className="training-metric">
+                    <dt>Recall</dt>
+                    <dd>{(job.metrics.recall * 100).toFixed(2)}%</dd>
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {job.error_message && (
-            <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800">
-                <span className="font-semibold">Error:</span> {job.error_message}
-              </p>
-            </div>
-          )}
-
-          {/* Configuration */}
-          <div className="mb-8 pb-8 border-b">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Configuration</h2>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <dl className="space-y-2">
-                {job.config && Object.entries(job.config).map(([key, value]) => (
-                  <div key={key} className="flex justify-between text-sm">
-                    <dt className="text-gray-600 font-medium">{key}:</dt>
-                    <dd className="text-gray-800">
-                      {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                    </dd>
-                  </div>
-                ))}
               </dl>
-            </div>
-          </div>
+            </section>
+          )}
 
-          {/* Actions */}
-          <div className="flex gap-4">
+          {job.error_message && (
+            <div className="training-error">
+              <p><strong>Error:</strong> {job.error_message}</p>
+            </div>
+          )}
+
+          <section className="training-section" aria-labelledby="training-job-config">
+            <h2 id="training-job-config">Configuration</h2>
+            <dl className="training-config">
+              {job.config && Object.entries(job.config).map(([key, value]) => (
+                <div key={key} className="training-config-row">
+                  <dt>{key}</dt>
+                  <dd>{typeof value === 'object' ? JSON.stringify(value) : String(value)}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <div className="training-actions">
             <button
               onClick={() => navigate('/training')}
-              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition"
+              className="button secondary"
             >
-              Back to Training
+              Back to training
             </button>
             {(job.status === 'completed' || job.status === 'failed') && (
               <button
-                onClick={() => navigate('/training')}
-                className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold transition"
+                onClick={() => navigate('/training/new')}
+                className="button primary"
               >
-                View All Jobs
+                Create follow-up run
               </button>
             )}
           </div>

@@ -21,7 +21,7 @@ export default function SensorWaveform() {
     SpO2: {
       label: 'SpO2',
       unit: '%',
-      color: 'var(--color-sensor-spo2, #117D8C)',
+      color: 'var(--color-sensor-spo2, #1f6f7a)',
       min: 70,
       max: 100,
     },
@@ -89,7 +89,7 @@ export default function SensorWaveform() {
       <div className="waveform-header">
         <div>
           <h1>Sensor Waveforms</h1>
-          <p className="waveform-subtitle">Simulated vital-sign trends for demonstration (synthetic data, not live monitoring)</p>
+          <p className="waveform-subtitle">Simulated vital-sign trends for demonstration. Synthetic data, not live monitoring.</p>
         </div>
         <div className="sensor-toggles">
           {Object.keys(selectedSensors).map(sensor => (
@@ -114,6 +114,9 @@ export default function SensorWaveform() {
               <div className="patient-info">
                 <strong>{patient.bed}</strong>
                 <span className={`status-badge ${patient.status.toLowerCase()}`}>
+                  <span className="status-icon" aria-hidden="true">
+                    {patient.status === 'Critical' ? '◆!' : patient.status === 'High' ? '▲!' : patient.status === 'Watch' ? '▲' : '●'}
+                  </span>
                   {patient.status}
                 </span>
               </div>

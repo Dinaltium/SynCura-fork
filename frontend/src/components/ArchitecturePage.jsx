@@ -1,384 +1,293 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-function ArchitectureIcon({ name }) {
-  const common = {
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    xmlns: 'http://www.w3.org/2000/svg',
-    'aria-hidden': true,
-  }
+const pipelineStages = [
+  {
+    title: 'Data ingestion',
+    body: 'Real-time vitals from bedside monitors via MQTT or HTTP endpoints.',
+    stack: 'MQTT, HTTP, WebSocket',
+  },
+  {
+    title: 'Preprocessing',
+    body: 'Normalization, feature engineering, and temporal windowing.',
+    stack: 'Feature engineering, windowing',
+  },
+  {
+    title: 'LSTM inference',
+    body: 'Deep learning inference for outcome prediction.',
+    stack: 'PyTorch, LSTM, GPU ready',
+  },
+  {
+    title: 'Risk scoring',
+    body: 'Probabilistic predictions with clinical alerts and Discord notifications.',
+    stack: 'NEWS2, SHAP, webhooks',
+  },
+]
 
-  const paths = {
-    architecture: <><rect x="9" y="3" width="6" height="6" rx="1" /><rect x="3" y="15" width="6" height="6" rx="1" /><rect x="15" y="15" width="6" height="6" rx="1" /><path d="M12 9v3M6 15v-3h12v3" /></>,
-    data: <><path d="M5 5h14v14H5z" /><path d="M8 9h8M8 13h8M8 17h5" /></>,
-    process: <><path d="M12 3v4M12 17v4M3 12h4M17 12h4" /><circle cx="12" cy="12" r="4" /></>,
-    model: <><path d="M12 3v18M3 12h18" /><circle cx="12" cy="12" r="7" /></>,
-    alert: <><path d="M12 3 3 20h18L12 3Z" /><path d="M12 9v5M12 17h.01" /></>,
-    metric: <><path d="M4 19V5M4 19h16" /><path d="m7 15 3-4 3 2 4-6" /></>,
-  }
+const technologyGroups = [
+  {
+    key: 'backend',
+    title: 'Backend',
+    items: [
+      ['FastAPI', 'REST endpoints and async I/O'],
+      ['PyTorch', 'LSTM inference engine'],
+      ['SQLite', 'Patient data persistence'],
+      ['MQTT', 'Real-time vital streaming'],
+    ],
+  },
+  {
+    key: 'frontend',
+    title: 'Frontend',
+    items: [
+      ['React 18', 'UI component framework'],
+      ['Vite', 'Next-generation build tooling'],
+      ['React Router', 'Client-side navigation'],
+      ['Tailwind CSS', 'Responsive styling'],
+    ],
+  },
+  {
+    key: 'ml',
+    title: 'ML Pipeline',
+    items: [
+      ['LSTM Networks', 'Time-series outcome prediction'],
+      ['PhysioNet', '8,000-patient PhysioNet 2012 dataset'],
+      ['SHAP', 'Model explainability and transparency'],
+      ['NEWS2', 'Clinical risk scoring standard'],
+    ],
+  },
+  {
+    key: 'hardware',
+    title: 'Hardware',
+    items: [
+      ['ESP32-MAX30105', 'Advanced pulse and SpO2 sensor'],
+      ['WiFi and MQTT Protocol', 'Decentralized data collection'],
+      ['Edge Computing', 'On-device inference ready'],
+    ],
+  },
+]
 
-  return <svg {...common} className="architecture-icon" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name] || paths.architecture}</svg>
-}
+const evaluationMetrics = [
+  {
+    term: 'Holdout AUC',
+    value: '84.4%',
+    note: '95 percent CI 0.836 to 0.852',
+    primary: true,
+  },
+  {
+    term: 'Holdout Accuracy',
+    value: '74.7%',
+    note: 'Unseen set-B evaluation',
+  },
+  {
+    term: 'Holdout Precision',
+    value: '34.5%',
+    note: 'Imbalanced mortality outcome',
+  },
+  {
+    term: 'Holdout Recall',
+    value: '80.7%',
+    note: 'Sensitivity to deterioration',
+  },
+]
+
+const systemFunctions = [
+  {
+    title: 'Simulated monitoring',
+    body: 'Synthetic patient vitals generated locally for demonstration, not live bedside data.',
+  },
+  {
+    title: 'AI-powered predictions',
+    body: 'LSTM ensemble trained on PhysioNet 2012 ICU data as a research prototype.',
+  },
+  {
+    title: 'Clinical transparency',
+    body: 'SHAP-based explainability showing which vitals drive each prediction.',
+  },
+  {
+    title: 'Scalable pipeline',
+    body: 'Microservices architecture supporting high-throughput multi-patient monitoring.',
+  },
+  {
+    title: 'Research-prototype security',
+    body: 'Local demo only. No auth, no encryption, and no audit logging. Not HIPAA-ready.',
+  },
+  {
+    title: 'Edge computing ready',
+    body: 'Sensor integration with ESP32 for decentralized patient monitoring.',
+  },
+]
+
+const deploymentEnvironments = [
+  {
+    title: 'Development',
+    body: 'Local development with hot reload and real-time debugging.',
+    command: 'npm run dev + python app.py',
+  },
+  {
+    title: 'Production ready',
+    body: 'Docker containerization, CI and CD pipelines, and cloud deployment.',
+    command: 'Docker + GitHub Actions',
+  },
+  {
+    title: 'Cloud deployment',
+    body: 'AWS, GCP, or Azure with Kubernetes orchestration.',
+    command: 'K8s + Helm charts',
+  },
+]
 
 export default function ArchitecturePage({ embedded = false }) {
   const [expandedSections, setExpandedSections] = useState({})
 
   const toggleSection = (section) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }))
   }
 
   return (
     <div id={embedded ? 'architecture' : undefined} className={`architecture-container ${embedded ? 'embedded' : ''}`}>
-      {/* Navigation (hide when embedded) */}
       {!embedded && (
-        <nav className="arch-nav">
+        <nav className="arch-nav" aria-label="Architecture">
           <Link to="/" className="arch-back">
-            ← Back to Home
+            Back to Home
           </Link>
         </nav>
       )}
 
-      {/* Hero */}
-      <section className="arch-hero">
-        <div className="arch-hero-content">
-          <div className="arch-hero-badge"><ArchitectureIcon name="architecture" /> SYSTEM ARCHITECTURE</div>
-          <h1>End-to-End ML Pipeline</h1>
-          <p className="arch-subtitle">
-            Research-prototype ICU monitoring demo with simulated vitals and offline-evaluated predictions
-          </p>
+      <section className="arch-hero" aria-labelledby={embedded ? 'embedded-architecture-title' : 'architecture-title'}>
+        {!embedded && <p className="arch-eyebrow">System architecture</p>}
+        <h1 id={embedded ? 'embedded-architecture-title' : 'architecture-title'}>End-to-End ML Pipeline</h1>
+        <p className="arch-subtitle">
+          Research-prototype ICU monitoring demo with simulated vitals and offline-evaluated predictions.
+        </p>
+        <dl className="arch-stats">
+          <div className="arch-stat">
+            <dt>Holdout AUC</dt>
+            <dd><strong>84.4 percent</strong><span>Research result</span></dd>
+          </div>
+          <div className="arch-stat">
+            <dt>PhysioNet patients</dt>
+            <dd><strong>8,000</strong><span>2012 challenge cohort</span></dd>
+          </div>
+          <div className="arch-stat">
+            <dt>Inference target</dt>
+            <dd><strong>CPU</strong><span>Real-time research scoring</span></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="arch-section reveal" aria-labelledby={embedded ? 'embedded-flow-title' : 'flow-title'}>
+        <div className="section-header">
+          <h2 id={embedded ? 'embedded-flow-title' : 'flow-title'}>Data flow pipeline</h2>
+          <p className="section-desc">Real-time ingestion, preprocessing, inference, and risk scoring.</p>
         </div>
-        <div className="arch-hero-stats">
-          <div className="stat-item">
-            <span className="stat-number">84.4%</span>
-            <span className="stat-label">Holdout AUC (research)</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">8,000</span>
-            <span className="stat-label">PhysioNet patients</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">CPU</span>
-            <span className="stat-label">Real-time inference</span>
-          </div>
+        <ol className="arch-flow">
+          {pipelineStages.map((stage) => (
+            <li key={stage.title} className="arch-flow-stage">
+              <div>
+                <h3>{stage.title}</h3>
+                <p>{stage.body}</p>
+              </div>
+              <p className="arch-flow-stack">{stage.stack}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="arch-section reveal" id="tech" aria-labelledby={embedded ? 'embedded-stack-title' : 'stack-title'}>
+        <div className="section-header">
+          <h2 id={embedded ? 'embedded-stack-title' : 'stack-title'}>Technology stack</h2>
+          <p className="section-desc">Research-prototype stack for demonstration and evaluation.</p>
+        </div>
+        <div className="tech-group-list">
+          {technologyGroups.map((group) => (
+            <div key={group.key} className={`tech-group ${expandedSections[group.key] ? 'expanded' : ''}`}>
+              <button
+                type="button"
+                className="tech-group-header"
+                onClick={() => toggleSection(group.key)}
+                aria-expanded={Boolean(expandedSections[group.key])}
+                aria-controls={`architecture-${group.key}-details`}
+              >
+                <span className="tech-title">{group.title}</span>
+                <span className="expand-icon" aria-hidden="true">{expandedSections[group.key] ? '-' : '+'}</span>
+              </button>
+              {expandedSections[group.key] && (
+                <dl className="tech-group-body" id={`architecture-${group.key}-details`}>
+                  {group.items.map(([name, role]) => (
+                    <div key={name} className="tech-item">
+                      <dt>{name}</dt>
+                      <dd>{role}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Architecture Overview - Data Flow */}
-      <section className="arch-section">
+      <section className="arch-section reveal" aria-labelledby={embedded ? 'embedded-metrics-title' : 'metrics-title'}>
         <div className="section-header">
-          <h2><ArchitectureIcon name="data" /> Data Flow Pipeline</h2>
-          <p className="section-desc">Real-time ingestion → Preprocessing → Inference → Risk Scoring</p>
-        </div>
-        <div className="arch-pipeline">
-          <div className="pipeline-stage stage-1">
-            <div className="stage-icon"><ArchitectureIcon name="data" /></div>
-            <h3>Data Ingestion</h3>
-            <p>Real-time vitals from bedside monitors via MQTT or HTTP endpoints</p>
-            <div className="stage-tech">MQTT • HTTP • WebSocket</div>
-          </div>
-          
-          <div className="pipeline-connector" aria-hidden="true">
-            <svg viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                  <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
-                </marker>
-              </defs>
-              <path d="M 10 20 Q 50 0, 90 20" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
-            </svg>
-          </div>
-
-          <div className="pipeline-stage stage-2">
-            <div className="stage-icon"><ArchitectureIcon name="process" /></div>
-            <h3>Preprocessing</h3>
-            <p>Normalization, feature engineering, temporal windowing</p>
-            <div className="stage-tech">Feature Engineering • Windowing</div>
-          </div>
-
-          <div className="pipeline-connector" aria-hidden="true">
-            <svg viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                  <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
-                </marker>
-              </defs>
-              <path d="M 10 20 Q 50 0, 90 20" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowhead2)" />
-            </svg>
-          </div>
-
-          <div className="pipeline-stage stage-3">
-            <div className="stage-icon"><ArchitectureIcon name="model" /></div>
-            <h3>LSTM Inference</h3>
-            <p>Deep learning inference for outcome prediction</p>
-            <div className="stage-tech">PyTorch • LSTM • GPU Ready</div>
-          </div>
-
-          <div className="pipeline-connector" aria-hidden="true">
-            <svg viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <marker id="arrowhead3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                  <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
-                </marker>
-              </defs>
-              <path d="M 10 20 Q 50 0, 90 20" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowhead3)" />
-            </svg>
-          </div>
-
-          <div className="pipeline-stage stage-4">
-            <div className="stage-icon"><ArchitectureIcon name="alert" /></div>
-            <h3>Risk Scoring</h3>
-            <p>Probabilistic predictions with clinical alerts & Discord notifications</p>
-            <div className="stage-tech">NEWS2 • SHAP • Webhooks</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Technology Stack - Interactive */}
-      <section className="arch-section">
-        <div className="section-header">
-          <h2><ArchitectureIcon name="process" /> Technology Stack</h2>
-          <p className="section-desc">Research-prototype stack for demonstration and evaluation</p>
-        </div>
-        <div className="tech-stack-grid">
-          <div className={`tech-card expandable ${expandedSections.backend ? 'expanded' : ''}`}>
-            <button type="button" className="tech-card-header" onClick={() => toggleSection('backend')} aria-expanded={Boolean(expandedSections.backend)} aria-controls="architecture-backend-details">
-              <div className="tech-icon"><ArchitectureIcon name="process" /></div>
-              <div className="tech-title">Backend</div>
-              <div className="expand-icon" aria-hidden="true">{expandedSections.backend ? '−' : '+'}</div>
-            </button>
-            {expandedSections.backend && (
-              <div className="tech-card-body" id="architecture-backend-details">
-                <div className="tech-item">
-                  <span className="tech-name">FastAPI</span>
-                  <span className="tech-role">REST endpoints & async I/O</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">PyTorch</span>
-                  <span className="tech-role">LSTM inference engine</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">SQLite</span>
-                  <span className="tech-role">Patient data persistence</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">MQTT</span>
-                  <span className="tech-role">Real-time vital streaming</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className={`tech-card expandable ${expandedSections.frontend ? 'expanded' : ''}`}>
-            <button type="button" className="tech-card-header" onClick={() => toggleSection('frontend')} aria-expanded={Boolean(expandedSections.frontend)} aria-controls="architecture-frontend-details">
-              <div className="tech-icon"><ArchitectureIcon name="architecture" /></div>
-              <div className="tech-title">Frontend</div>
-              <div className="expand-icon" aria-hidden="true">{expandedSections.frontend ? '−' : '+'}</div>
-            </button>
-            {expandedSections.frontend && (
-              <div className="tech-card-body" id="architecture-frontend-details">
-                <div className="tech-item">
-                  <span className="tech-name">React 18</span>
-                  <span className="tech-role">UI component framework</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">Vite</span>
-                  <span className="tech-role">Next-gen build tooling</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">React Router</span>
-                  <span className="tech-role">Client-side navigation</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">Tailwind CSS</span>
-                  <span className="tech-role">Responsive styling</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className={`tech-card expandable ${expandedSections.ml ? 'expanded' : ''}`}>
-            <button type="button" className="tech-card-header" onClick={() => toggleSection('ml')} aria-expanded={Boolean(expandedSections.ml)} aria-controls="architecture-ml-details">
-              <div className="tech-icon"><ArchitectureIcon name="model" /></div>
-              <div className="tech-title">ML Pipeline</div>
-              <div className="expand-icon" aria-hidden="true">{expandedSections.ml ? '−' : '+'}</div>
-            </button>
-            {expandedSections.ml && (
-              <div className="tech-card-body" id="architecture-ml-details">
-                <div className="tech-item">
-                  <span className="tech-name">LSTM Networks</span>
-                  <span className="tech-role">Time-series outcome prediction</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">PhysioNet</span>
-                  <span className="tech-role">8,000-patient PhysioNet 2012 dataset</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">SHAP</span>
-                  <span className="tech-role">Model explainability & transparency</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">NEWS2</span>
-                  <span className="tech-role">Clinical risk scoring standard</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className={`tech-card expandable ${expandedSections.hardware ? 'expanded' : ''}`}>
-            <button type="button" className="tech-card-header" onClick={() => toggleSection('hardware')} aria-expanded={Boolean(expandedSections.hardware)} aria-controls="architecture-hardware-details">
-              <div className="tech-icon"><ArchitectureIcon name="data" /></div>
-              <div className="tech-title">Hardware</div>
-              <div className="expand-icon" aria-hidden="true">{expandedSections.hardware ? '−' : '+'}</div>
-            </button>
-            {expandedSections.hardware && (
-              <div className="tech-card-body" id="architecture-hardware-details">
-                <div className="tech-item">
-                  <span className="tech-name">ESP32-MAX30105</span>
-                  <span className="tech-role">Advanced pulse/SpO2 sensor</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">WiFi/MQTT Protocol</span>
-                  <span className="tech-role">Decentralized data collection</span>
-                </div>
-                <div className="tech-item">
-                  <span className="tech-name">Edge Computing</span>
-                  <span className="tech-role">On-device inference ready</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Model Performance */}
-      <section className="arch-section">
-        <div className="section-header">
-          <h2><ArchitectureIcon name="metric" /> Model Performance Metrics</h2>
-          <p className="section-desc">Evaluated on PhysioNet 2012 (8,000 patients; val AUC 0.840, holdout AUC 0.844)</p>
+          <h2 id={embedded ? 'embedded-metrics-title' : 'metrics-title'}>Model performance metrics</h2>
+          <p className="section-desc">Evaluated on PhysioNet 2012: validation AUC 0.840 and holdout AUC 0.844.</p>
         </div>
         <div className="metrics-showcase">
-          <div className="metric-box metric-primary">
-            <div className="metric-icon"><ArchitectureIcon name="metric" /></div>
-            <div className="metric-value">84.4%</div>
-            <div className="metric-name">Holdout AUC (95% CI 0.836–0.852)</div>
-            <div className="metric-bar"><div style={{'--metric-scale': 0.844}}></div></div>
-          </div>
-          <div className="metric-box">
-            <div className="metric-icon"><ArchitectureIcon name="metric" /></div>
-            <div className="metric-value">74.7%</div>
-            <div className="metric-name">Holdout Accuracy</div>
-            <div className="metric-bar"><div style={{'--metric-scale': 0.747}}></div></div>
-          </div>
-          <div className="metric-box">
-            <div className="metric-icon"><ArchitectureIcon name="metric" /></div>
-            <div className="metric-value">34.5%</div>
-            <div className="metric-name">Holdout Precision</div>
-            <div className="metric-bar"><div style={{'--metric-scale': 0.345}}></div></div>
-          </div>
-          <div className="metric-box">
-            <div className="metric-icon"><ArchitectureIcon name="alert" /></div>
-            <div className="metric-value">80.7%</div>
-            <div className="metric-name">Holdout Recall</div>
-            <div className="metric-bar"><div style={{'--metric-scale': 0.807}}></div></div>
-          </div>
+          {evaluationMetrics.map((metric) => (
+            <div key={metric.term} className={`metric-box ${metric.primary ? 'metric-primary' : ''}`}>
+              <p className="metric-term">{metric.term}</p>
+              <p className="metric-value">{metric.value}</p>
+              <p className="metric-name">{metric.note}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Key Features */}
-      <section className="arch-section features-section">
+      <section className="arch-section reveal" aria-labelledby={embedded ? 'embedded-functions-title' : 'functions-title'}>
         <div className="section-header">
-          <h2><ArchitectureIcon name="architecture" /> Key Features</h2>
-          <p className="section-desc">Enterprise-grade monitoring and AI-driven insights</p>
+          <h2 id={embedded ? 'embedded-functions-title' : 'functions-title'}>Key functions</h2>
+          <p className="section-desc">Monitoring, prediction, transparency, deployment, and research limits.</p>
         </div>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-number">01</div>
-            <div className="feature-icon" aria-hidden="true">🔍</div>
-            <h3>Simulated Monitoring</h3>
-            <p>Synthetic patient vitals generated locally for demonstration (not live bedside data)</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-number">02</div>
-            <div className="feature-icon"><ArchitectureIcon name="model" /></div>
-            <h3>AI-Powered Predictions</h3>
-            <p>LSTM ensemble trained on PhysioNet 2012 ICU data (research prototype)</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-number">03</div>
-            <div className="feature-icon" aria-hidden="true">📊</div>
-            <h3>Clinical Transparency</h3>
-            <p>SHAP-based explainability showing which vitals drive each prediction</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-number">04</div>
-            <div className="feature-icon" aria-hidden="true">⚡</div>
-            <h3>Scalable Pipeline</h3>
-            <p>Microservices architecture supporting high-throughput multi-patient monitoring</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-number">05</div>
-            <div className="feature-icon" aria-hidden="true">🔐</div>
-            <h3>Research-Prototype Security</h3>
-            <p>Local demo only: no auth, no encryption, no audit logging — not HIPAA-ready</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-number">06</div>
-            <div className="feature-icon" aria-hidden="true">📱</div>
-            <h3>Edge Computing Ready</h3>
-            <p>Sensor integration with ESP32 for decentralized patient monitoring</p>
-          </div>
+        <div className="arch-function-list">
+          {systemFunctions.map((item) => (
+            <article key={item.title} className="arch-function">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-
-      {/* Deployment & Infrastructure */}
-      <section className="arch-section deployment-section">
+      <section className="arch-section reveal" aria-labelledby={embedded ? 'embedded-deployment-title' : 'deployment-title'}>
         <div className="section-header">
-          <h2><span aria-hidden="true">🚀 </span>Deployment & Infrastructure</h2>
-          <p className="section-desc">Development, staging, and production configurations</p>
+          <h2 id={embedded ? 'embedded-deployment-title' : 'deployment-title'}>Deployment and infrastructure</h2>
+          <p className="section-desc">Development, staging, and production configurations.</p>
         </div>
-        <div className="deployment-grid">
-          <div className="deployment-card">
-            <div className="deployment-icon" aria-hidden="true">💻</div>
-            <h3>Development</h3>
-            <p>Local development with hot-reload and real-time debugging</p>
-            <div className="deployment-code">
-              npm run dev + python app.py
-            </div>
-          </div>
-          <div className="deployment-card">
-            <div className="deployment-icon"><ArchitectureIcon name="process" /></div>
-            <h3>Production Ready</h3>
-            <p>Docker containerization, CI/CD pipelines, cloud deployment</p>
-            <div className="deployment-code">
-              Docker + GitHub Actions
-            </div>
-          </div>
-          <div className="deployment-card">
-            <div className="deployment-icon" aria-hidden="true">🌐</div>
-            <h3>Cloud Deployment</h3>
-            <p>AWS/GCP/Azure ready with Kubernetes orchestration</p>
-            <div className="deployment-code">
-              K8s + Helm charts
-            </div>
-          </div>
+        <div className="deployment-list">
+          {deploymentEnvironments.map((environment) => (
+            <article key={environment.title} className="deployment-row">
+              <div>
+                <h3>{environment.title}</h3>
+                <p>{environment.body}</p>
+              </div>
+              <p className="deployment-code">{environment.command}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="arch-cta">
-        <div className="cta-content">
-          <h2><span aria-hidden="true">🎯 </span>Ready to Explore?</h2>
-          <p>Launch the interactive dashboard to see the system in action</p>
+      {!embedded && (
+        <section className="arch-final" aria-labelledby="architecture-final-title">
+          <div>
+            <h2 id="architecture-final-title">Ready to explore</h2>
+            <p>Launch the interactive dashboard to see the system in action.</p>
+          </div>
           <Link to="/dashboard" className="cta-button">
-            Launch Dashboard <span>→</span>
+            Launch dashboard
           </Link>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }

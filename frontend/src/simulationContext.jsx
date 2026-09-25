@@ -217,8 +217,27 @@ export function SimulationProvider({ children }) {
   const [activeScenario, setActiveScenario] = useState('baseline')
   const [patientQueue, setPatientQueue] = useState(() => seedIcuEnvironment(DEFAULT_PATIENTS))
   const [lastUpdated, setLastUpdated] = useState(new Date())
-  const [isPaused, setIsPaused] = useState(true)
+  const [isPaused, setIsPaused] = useState(false)
   const lastIngestTime = React.useRef({}) // Track last ingest time per patient
+  const backendReachableRef = React.useRef(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 8000)
+    fetch(`${API_URL}/health`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Health check failed: ${response.status}`)
+        backendReachableRef.current = true
+      })
+      .catch(() => {
+        backendReachableRef.current = false
+      })
+      .finally(() => window.clearTimeout(timeout))
+    return () => {
+      controller.abort()
+      window.clearTimeout(timeout)
+    }
+  }, [])
 
   // Send vitals to backend for alert processing (with cooldown)
   useEffect(() => {
@@ -236,8 +255,8 @@ export function SimulationProvider({ children }) {
         updated.forEach((patient) => {
           const lastTime = lastIngestTime.current[patient.patient_id] || 0
           
-          // Only send if cooldown has passed
-          if (now - lastTime >= INGEST_COOLDOWN_MS) {
+          // Only send if the backend is reachable and cooldown has passed
+          if (backendReachableRef.current && now - lastTime >= INGEST_COOLDOWN_MS) {
             const vital = {
               patient_id: patient.patient_id,
               timestamp: Date.now() / 1000,
@@ -277,7 +296,7 @@ export function SimulationProvider({ children }) {
       resetSimulation: () => {
         setPatientQueue(seedIcuEnvironment(DEFAULT_PATIENTS))
         setActiveScenario('baseline')
-        setIsPaused(true)
+        setIsPaused(false)
         setLastUpdated(new Date())
       },
     }),

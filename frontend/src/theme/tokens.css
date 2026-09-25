@@ -1,32 +1,55 @@
 :root {
-  --font-ui: 'Atkinson Hyperlegible', sans-serif;
-  --font-display: 'Atkinson Hyperlegible', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  color-scheme: light dark;
 
-  --color-canvas: #f4f7f8;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-ui: var(--font-body);
+
+  /* Core palette (light theme is the default) */
+  --color-bg: #f7f6f2;
   --color-surface: #ffffff;
-  --color-surface-muted: #e8eff0;
-  --color-surface-raised: #ffffff;
-  --color-ink: #12343b;
-  --color-ink-muted: #557078;
-  --color-ink-subtle: #71868b;
-  --color-border: #c9d8db;
-  --color-border-strong: #a9c1c5;
-  --color-brand: #117d8c;
-  --color-brand-light: #159eaf;
-  --color-brand-dark: #0d6470;
-  --color-live: #258a62;
-  --color-live-soft: #dcefe7;
-  --color-warning: #986617;
-  --color-warning-soft: #f7ecd4;
-  --color-critical: #b33d3a;
-  --color-critical-soft: #f7e2e0;
+  --color-fg: #15151a;
+  --color-muted: #5b5850;
+  --color-border: #dedad0;
+  --color-accent: #ff5c1f;
+  --color-accent-hover: #ff7440;
+
+  /* Status and alert scale (theme-aware; dark overrides below) */
+  --color-status-stable: #1f8f5f;
+  --color-status-watch: #a67c00;
+  --color-status-high: #c95a10;
+  --color-status-critical: #d31f1f;
+
+  /* Data visualization */
+  --color-viz-contrib-pos: #ff5c6a;
+  --color-viz-contrib-neg: #3f9bd6;
+  --color-viz-grid: var(--color-border);
+  --color-viz-baseline: var(--color-muted);
+
+  /* Project aliases mapped onto the locked theme */
+  --color-canvas: var(--color-bg);
+  --color-surface-muted: #efece4;
+  --color-surface-raised: var(--color-surface);
+  --color-ink: var(--color-fg);
+  --color-ink-muted: var(--color-muted);
+  --color-ink-subtle: var(--color-muted);
+  --color-border-strong: #c9c2b2;
+  --color-brand: var(--color-accent);
+  --color-brand-light: var(--color-accent-hover);
+  --color-brand-dark: #b53c0a;
+  --color-live: var(--color-status-stable);
+  --color-live-soft: #e3f2e9;
+  --color-warning: var(--color-status-watch);
+  --color-warning-soft: #faf3dd;
+  --color-critical: var(--color-status-critical);
+  --color-critical-soft: #fbe7e5;
   --color-info: #356a91;
   --color-info-soft: #e2edf5;
-  --color-focus: #159eaf;
-  --color-on-brand: #ffffff;
+  --color-focus: var(--color-accent);
+  --color-on-brand: #15151a;
   --color-sensor-hr: #bf3f2f;
-  --color-sensor-spo2: #117d8c;
+  --color-sensor-spo2: #1f6f7a;
   --color-sensor-resp: #9d521d;
   --color-sensor-temp: #7c3a1d;
 
@@ -40,56 +63,80 @@
   --space-10: 40px;
   --space-12: 48px;
 
-  --radius-control: 6px;
-  --radius-panel: 8px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-control: var(--radius-sm);
+  --radius-panel: var(--radius-md);
   --radius-pill: 999px;
 
-  --shadow-panel: 0 1px 2px rgba(18, 52, 59, 0.05), 0 8px 24px rgba(18, 52, 59, 0.06);
-  --shadow-focus: 0 0 0 3px rgba(21, 158, 175, 0.25);
+  /* Shape system: calls to action use pills, workflow surfaces use 12px panels,
+     and form controls use 6px controls. Status labels always use pills. */
+  --layout-max: 1400px;
+  --grid-max: 1120px;
+  --layer-nav: 100;
+  --layer-skip-link: 1000;
 
-  --duration-fast: 140ms;
-  --duration-normal: 220ms;
-  --duration-slow: 420ms;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --shadow-panel: 0 1px 2px rgba(21, 21, 26, 0.05), 0 8px 24px rgba(21, 21, 26, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(255, 92, 31, 0.25);
+
+  --duration-fast: 160ms;
+  --duration-normal: 320ms;
+  --duration-slow: 640ms;
+  --duration-cinematic: 1100ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.64, 0, 0.78, 0);
+  --ease-out: var(--ease-enter);
+  --ease-systole: cubic-bezier(0.16, 0.84, 0.24, 1);
+  --ease-diastole: cubic-bezier(0.6, 0, 0.4, 1);
 }
 
 .theme-dark {
-  --color-canvas: #0c1b20;
-  --color-surface: #12282e;
-  --color-surface-muted: #19363d;
-  --color-surface-raised: #1b3b43;
-  --color-ink: #e8f3f4;
-  --color-ink-muted: #a9c0c4;
-  --color-ink-subtle: #819ba0;
-  --color-border: #2b4a51;
-  --color-border-strong: #44676e;
-  --color-brand: #4bc2d0;
-  --color-brand-light: #7bd9e2;
-  --color-brand-dark: #2b9baa;
-  --color-live: #66d7a7;
-  --color-live-soft: #19483d;
-  --color-warning: #f0bd63;
-  --color-warning-soft: #4b391d;
-  --color-critical: #f08079;
-  --color-critical-soft: #4e292b;
-  --color-info: #8fc5e6;
-  --color-info-soft: #1e3c50;
-  --color-focus: #7bd9e2;
-  --color-on-brand: #082126;
-  --color-sensor-hr: #f08079;
-  --color-sensor-spo2: #4bc2d0;
-  --color-sensor-resp: #f0bd63;
+  --color-bg: #0e0e11;
+  --color-surface: #17171c;
+  --color-fg: #f2f0ea;
+  --color-muted: #a7a39a;
+  --color-border: #2a2a31;
+
+  --color-status-stable: #3fb37f;
+  --color-status-watch: #e0b400;
+  --color-status-high: #ff8a3d;
+  --color-status-critical: #ff3b3b;
+
+  --color-canvas: var(--color-bg);
+  --color-surface-muted: #1e1e24;
+  --color-surface-raised: #202027;
+  --color-ink: var(--color-fg);
+  --color-ink-muted: var(--color-muted);
+  --color-ink-subtle: var(--color-muted);
+  --color-border-strong: #3a3a42;
+  --color-brand-dark: var(--color-accent);
+  --color-live-soft: #14261e;
+  --color-warning-soft: #26200f;
+  --color-critical-soft: #2a1514;
+  --color-info-soft: #16222e;
+  --color-on-brand: #0e0e11;
+  --color-sensor-hr: #ff7a70;
+  --color-sensor-spo2: #5cc6d2;
+  --color-sensor-resp: #e8b25c;
   --color-sensor-temp: #e0a27e;
 
   --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.28), 0 10px 28px rgba(0, 0, 0, 0.16);
-  --shadow-focus: 0 0 0 3px rgba(123, 217, 226, 0.28);
+  --shadow-focus: 0 0 0 3px rgba(255, 92, 31, 0.35);
 }
 
 :where(button, a, input, select, textarea):focus-visible {
   outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+  outline-offset: 3px;
   box-shadow: var(--shadow-focus);
+}
+
+.status-pill:focus-visible,
+.status-badge:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  box-shadow: none;
 }
 
 ::selection {
